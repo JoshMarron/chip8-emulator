@@ -116,7 +116,7 @@ impl Memory {
     pub fn print_mem_section(&self, start: u16, end: u16) {
         for (address, data) in self.memory.iter().enumerate() {
             if address as u16 >= start && address as u16 <= end {
-                debug!("{:04X} : {:02x}", address, data);
+                trace!("{:04X} : {:02x}", address, data);
             }
         }
     }

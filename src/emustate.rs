@@ -35,7 +35,7 @@ impl Chip8State {
         if let Instruction::Unknown(op) = instruction {
             error!("{} is unknown opcode", op);
         } else {
-            info!("{:04X} -- {:?}", self.cpu.program_counter().full(), instruction)
+            debug!("{:04X} -- {:?}", self.cpu.program_counter().full(), instruction)
         }
     }
 
