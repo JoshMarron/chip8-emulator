@@ -18,7 +18,7 @@ impl Chip8State {
         }
     }
 
-    pub fn load_instructions(&mut self, program: Vec<byte>) {
+    pub fn load_instructions(&mut self, program: Vec<Byte>) {
         let mut address = Word::new_from_full(PC_START);
         for byte in program {
             self.memory.write(&address, byte);
@@ -32,16 +32,15 @@ impl Chip8State {
         let opcode = self.fetch_instruction();
         let instruction = decoder::decode(opcode);
         
-        match instruction {
-            Instruction::Unknown => {
-
-            },
-            _ => info!("{:?}", instruction)
+        if let Instruction::Unknown(op) = instruction {
+            error!("{} is unknown opcode", op);
+        } else {
+            info!("{:04X} -- {:?}", self.cpu.program_counter().full(), instruction)
         }
     }
 
     pub fn fetch_instruction(&mut self) -> Word {
-        let mut counter = self.cpu.program_counter();
+        let mut counter = self.cpu.program_counter_mut();
 
         let high_byte = self.memory.read(&counter);
         counter += 1;

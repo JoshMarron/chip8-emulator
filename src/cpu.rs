@@ -1,17 +1,17 @@
-use memory::byte;
+use memory::Byte;
 use memory::Word;
 use emustate;
 
 pub struct Cpu {
-     v_registers : Vec<byte>,
+     v_registers : Vec<Byte>,
      i_register : Word,
      stack_pointer: Word,
-     sound_timer: byte,
-     delay_time: byte,
+     sound_timer: Byte,
+     delay_time: Byte,
      program_counter: Word   
 }
 
-impl<'a> Cpu {
+impl Cpu {
     pub fn new() -> Cpu {
         Cpu {
             v_registers: vec![0; 16],
@@ -23,7 +23,11 @@ impl<'a> Cpu {
         }
     }
 
-    pub fn program_counter(&mut self) -> &mut Word {
+    pub fn program_counter_mut(&mut self) -> &mut Word {
         &mut self.program_counter
+    }
+
+    pub fn program_counter(&self) -> &Word {
+        &self.program_counter
     }
 }

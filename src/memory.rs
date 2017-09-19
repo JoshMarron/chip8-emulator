@@ -5,22 +5,22 @@ use std::fmt;
 #[derive(Clone)]
 pub struct Word {
     full: u16,
-    high: byte,
-    low: byte
+    high: Byte,
+    low: Byte
 }
 
-pub type byte = u8;
+pub type Byte = u8;
 
 impl Word {
     pub fn new_from_full(full: u16) -> Word {
         Word {
             full,
-            high: ((full & 0xFF00) >> 8) as byte,
-            low: (full & 0x00FF) as byte
+            high: ((full & 0xFF00) >> 8) as Byte,
+            low: (full & 0x00FF) as Byte
         }
     }
 
-    pub fn new_from_bytes(high: byte, low: byte) -> Word {
+    pub fn new_from_bytes(high: Byte, low: Byte) -> Word {
         Word {
             full: ((high as u16) << 8) + low as u16,
             high: high,
@@ -66,22 +66,22 @@ impl ops::Add<u16> for Word {
 impl ops::AddAssign<u16> for Word {
     fn add_assign(&mut self, val: u16) {
         self.full = self.full + val;
-        self.high = (self.full >> 8) as byte;
-        self.low = (self.full & 0x00FF) as byte;
+        self.high = (self.full >> 8) as Byte;
+        self.low = (self.full & 0x00FF) as Byte;
     }
 }
 
 impl<'a> ops::AddAssign<u16> for &'a mut Word {
     fn add_assign(&mut self, val: u16) {
         self.full = self.full + val;
-        self.high = (self.full >> 8) as byte;
-        self.low = (self.full & 0x00FF) as byte;
+        self.high = (self.full >> 8) as Byte;
+        self.low = (self.full & 0x00FF) as Byte;
     }
 }
 
 #[derive(Debug)]
 pub struct Memory {
-    memory: Vec<byte>,
+    memory: Vec<Byte>,
     stack: Vec<Word>,
     memory_size: usize
 }
@@ -99,14 +99,14 @@ impl Memory {
         }
     }
 
-    pub fn read(&self, address: &Word) -> byte {
+    pub fn read(&self, address: &Word) -> Byte {
         if address.full >= self.memory_size as u16 {
             panic!(format!("Fatal: tried to read out of memory range: {:04X}", address.full));
         }
         self.memory[address.full as usize]
     }
 
-    pub fn write(&mut self, address: &Word, value: byte) {
+    pub fn write(&mut self, address: &Word, value: Byte) {
         if address.full >= self.memory_size as u16 {
             panic!(format!("Fatal: tried to write out of memory range: {:04X}", address.full));
         }

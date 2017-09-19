@@ -1,5 +1,5 @@
 use emustate::Chip8State;
-use memory::byte;
+use memory::Byte;
 
 use std::error::Error;
 use std::fs::File;
@@ -13,7 +13,7 @@ pub struct Config {
 
 pub fn run(config: Config) -> Result<(), Box<Error>> {
     let mut rom_file = File::open(config.filename)?;
-    let mut bytes : Vec<byte> = Vec::new(); 
+    let mut bytes : Vec<Byte> = Vec::new(); 
     rom_file.read_to_end(&mut bytes)?;
 
     info!("Bytes size: {}", bytes.len());
@@ -28,7 +28,7 @@ pub fn run(config: Config) -> Result<(), Box<Error>> {
 
 pub fn loop_emulation(mut state: Chip8State) {
     
-    for _ in 0..270 {
+    for _ in 0..121 {
         state.run_next_cycle();
     }
 }
