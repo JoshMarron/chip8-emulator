@@ -12,3 +12,7 @@ args:
     - verbose:
         help: Sets the verbosity of the program - prints more debug stuff
         short: v
+    - debug:
+        help: Makes the emulation step by step on the command line and prints the state each time
+        short: d
+        long: debug

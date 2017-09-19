@@ -1,7 +1,6 @@
 use std::ops;
 use std::fmt;
 
-#[derive(Debug)]
 #[derive(Clone)]
 pub struct Word {
     full: u16,
@@ -43,6 +42,12 @@ impl Word {
 
 impl fmt::Display for Word {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:04x}", self.full)
+    }
+}
+
+impl fmt::Debug for Word {
+    fn fmt(&self, f:&mut fmt::Formatter) -> fmt::Result {
         write!(f, "full: {:04x} high: {:02x} low {:02x}", self.full, self.high, self.low)
     }
 }

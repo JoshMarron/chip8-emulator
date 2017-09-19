@@ -2,6 +2,7 @@ use memory::Byte;
 use memory::Word;
 use emustate;
 
+#[derive(Debug)]
 pub struct Cpu {
      v_registers : Vec<Byte>,
      i_register : Word,

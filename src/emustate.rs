@@ -37,6 +37,8 @@ impl Chip8State {
         } else {
             debug!("{:04X} -- {:?}", self.cpu.program_counter().full(), instruction)
         }
+
+        trace!("{:?}", self.cpu);
     }
 
     pub fn fetch_instruction(&mut self) -> Word {

@@ -21,10 +21,11 @@ fn main() {
 
     let config = emulator::Config {
         filename: matches.value_of("ROM").unwrap().to_string(),
-        verbose: matches.is_present("verbose")
+        verbose: matches.is_present("verbose"),
+        debug: matches.is_present("debug")
     };
 
-    if let Err(e) = setup_logging(&config.verbose) {
+    if let Err(e) = setup_logging(&config) {
         error!("Error setting up logging: {}", e);
         process::exit(1);
     };
@@ -35,11 +36,13 @@ fn main() {
     }
 }
 
-pub fn setup_logging(verbose: &bool) -> Result<(), fern::InitError> {
+pub fn setup_logging(config: &emulator::Config) -> Result<(), fern::InitError> {
     
     let mut level = log::LogLevelFilter::Info;
-    if *verbose {
+    if config.verbose {
         level = log::LogLevelFilter::Debug;
+    } else if config.debug {
+        level = log::LogLevelFilter::Trace;
     }
     
     fern::Dispatch::new()
