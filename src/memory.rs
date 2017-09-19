@@ -1,6 +1,8 @@
 use std::ops;
+use std::fmt;
 
 #[derive(Debug)]
+#[derive(Clone)]
 pub struct Word {
     full: u16,
     high: byte,
@@ -24,6 +26,24 @@ impl Word {
             high: high,
             low: low
         }
+    }
+
+    pub fn full(&self) -> u16 {
+        self.full.clone()
+    }
+
+    pub fn high(&self) -> u8 {
+        self.high.clone()
+    }
+
+    pub fn low(&self) -> u8 {
+        self.low.clone()
+    }
+}
+
+impl fmt::Display for Word {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "full: {:04x} high: {:02x} low {:02x}", self.full, self.high, self.low)
     }
 }
 

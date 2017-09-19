@@ -21,11 +21,14 @@ pub fn run(config: Config) -> Result<(), Box<Error>> {
     let mut init_state = Chip8State::new();
     init_state.load_instructions(bytes);
 
+    loop_emulation(init_state);
+
     Ok(())
 }
 
-pub fn loop_emulation(state: Chip8State) {
+pub fn loop_emulation(mut state: Chip8State) {
     loop {
         state.run_next_cycle();
+        break;
     }
 }

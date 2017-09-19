@@ -59,3 +59,25 @@ pub struct RegisterRegisterNibble {
     pub second_reg: byte,
     pub nibble: byte
 }
+
+pub fn decode(opcode: Word) -> Instruction {
+    
+    return match opcode.high() {
+        0x60...0x6F => {
+            info!("{}", opcode);
+            let register = get_register(&opcode);
+            let value = get_value(&opcode);
+            info!("{} into {:X}", value, register);
+            Instruction::LD(RegisterVal {register, value})
+        },
+        _ => Instruction::CLS
+    }
+}
+
+pub fn get_register(opcode: &Word) -> byte {
+    opcode.high() & 0x0F
+}
+
+pub fn get_value(opcode: &Word) -> byte {
+    opcode.low()
+}
