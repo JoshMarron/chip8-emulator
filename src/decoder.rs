@@ -76,35 +76,31 @@ pub fn decode(opcode: Word) -> Instruction {
             Instruction::CALL(address)
         },
         0x30...0x3F => {
-            let register = get_register(&opcode);
-            let value = get_value(&opcode);
-            Instruction::SE(RegisterVal {register, value})
+            let register_val = get_register_val(&opcode);
+            Instruction::SE(register_val)
         },
         0x40...0x4F => {
-            let register = get_register(&opcode);
-            let value = get_value(&opcode);
-            Instruction::SNE(RegisterVal {register, value})
+            let register_val = get_register_val(&opcode);
+            Instruction::SNE(register_val)
         },
         0x50...0x5F => {
-            let (first_reg, second_reg) = get_both_registers(&opcode);
-            Instruction::SER(RegisterRegister {first_reg, second_reg})
+            let registers = get_both_registers(&opcode);
+            Instruction::SER(registers)
         }
         0x60...0x6F => {
-            let register = get_register(&opcode);
-            let value = get_value(&opcode);
-            Instruction::LD(RegisterVal {register, value})
+            let register_val = get_register_val(&opcode);
+            Instruction::LD(register_val)
         },
         0x70...0x7F => {
-            let register = get_register(&opcode);
-            let value = get_value(&opcode);
-            Instruction::ADD(RegisterVal {register, value})
+            let register_val = get_register_val(&opcode);
+            Instruction::ADD(register_val)
         },
         0x80...0x8F => {
             decode_operations(opcode)
         },
         0x90...0x9F => {
-            let (first_reg, second_reg) = get_both_registers(&opcode);
-            Instruction::SNER(RegisterRegister {first_reg, second_reg})
+            let registers = get_both_registers(&opcode);
+            Instruction::SNER(registers)
         },
         0xA0...0xAF => {
             let address = get_address(&opcode);
@@ -115,13 +111,12 @@ pub fn decode(opcode: Word) -> Instruction {
             Instruction::JUMPV0(address)
         },
         0xC0...0xCF => {
-            let register = get_register(&opcode);
-            let value = get_value(&opcode);
-            Instruction::RND(RegisterVal {register, value})
+            let register_val = get_register_val(&opcode);
+            Instruction::RND(register_val)
         },
         0xD0...0xDF => {
-            let (first_reg, second_reg, nibble) = get_both_registers_and_nibble(&opcode);
-            Instruction::DRW(RegisterRegisterNibble {first_reg, second_reg, nibble})
+            let registers_nibble = get_both_registers_and_nibble(&opcode);
+            Instruction::DRW(registers_nibble)
         },
         0xE0...0xEF => {
             decode_skip_keys(opcode)
@@ -146,35 +141,35 @@ pub fn decode_flow(opcode: Word) -> Instruction {
 }
 
 pub fn decode_operations(opcode: Word) -> Instruction {
-    let (first_reg, second_reg) = get_both_registers(&opcode);
+    let registers = get_both_registers(&opcode);
 
     return match opcode.low() & 0x0F {
         0x0 => {
-            Instruction::LDR(RegisterRegister {first_reg, second_reg})
+            Instruction::LDR(registers)
         },
         0x1 => {
-            Instruction::ORR(RegisterRegister {first_reg, second_reg})
+            Instruction::ORR(registers)
         },
         0x2 => {
-            Instruction::ANDR(RegisterRegister {first_reg, second_reg})
+            Instruction::ANDR(registers)
         },
         0x3 => {
-            Instruction::XORR(RegisterRegister {first_reg, second_reg})
+            Instruction::XORR(registers)
         },
         0x4 => {
-            Instruction::ADDR(RegisterRegister {first_reg, second_reg})
+            Instruction::ADDR(registers)
         },
         0x5 => {
-            Instruction::SUBR(RegisterRegister {first_reg, second_reg})
+            Instruction::SUBR(registers)
         },
         0x6 => {
-            Instruction::SHR(first_reg)
+            Instruction::SHR(registers.first_reg)
         },
         0x7 => {
-            Instruction::SUBNR(RegisterRegister {first_reg, second_reg})
+            Instruction::SUBNR(registers)
         },
         0xE => {
-            Instruction::SHL(first_reg)
+            Instruction::SHL(registers.first_reg)
         }
         _ => Instruction::Unknown(opcode)
     }
@@ -231,16 +226,26 @@ pub fn get_register(opcode: &Word) -> Byte {
     opcode.high() & 0x0F
 }
 
-pub fn get_value(opcode: &Word) -> Byte {
-    opcode.low()
+pub fn get_register_val(opcode: &Word) -> RegisterVal {
+    RegisterVal {
+        register: opcode.high() & 0x0F,
+        value: opcode.low()
+    }
 }
 
-pub fn get_both_registers(opcode: &Word) -> (Byte, Byte) {
-    (opcode.high() & 0x0F, opcode.low() >> 4)
+pub fn get_both_registers(opcode: &Word) -> RegisterRegister {
+    RegisterRegister {
+        first_reg: opcode.high() & 0x0F, 
+        second_reg: opcode.low() >> 4
+    }
 }
 
-pub fn get_both_registers_and_nibble(opcode: &Word) -> (Byte, Byte, Byte) {
-    (opcode.high() & 0x0F, opcode.low() >> 4, opcode.low() & 0x0F)
+pub fn get_both_registers_and_nibble(opcode: &Word) -> RegisterRegisterNibble {
+    RegisterRegisterNibble {
+        first_reg: opcode.high() & 0x0F, 
+        second_reg: opcode.low() >> 4, 
+        nibble: opcode.low() & 0x0F
+    }
 }
 
 pub fn get_address(opcode: &Word) -> Word {
