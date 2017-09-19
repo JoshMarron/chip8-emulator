@@ -1,5 +1,6 @@
 use std::ops;
 
+#[derive(Debug)]
 pub struct Word {
     full: u16,
     high: byte,
@@ -26,6 +27,14 @@ impl Word {
     }
 }
 
+impl<'a> ops::Add<u16> for &'a mut Word {
+    type Output = Word;
+
+    fn add(self, other: u16) -> Word {
+        Word::new_from_full(self.full + other)
+    }
+}
+
 impl ops::Add<u16> for Word {
     type Output = Word;
 
@@ -42,9 +51,18 @@ impl ops::AddAssign<u16> for Word {
     }
 }
 
+impl<'a> ops::AddAssign<u16> for &'a mut Word {
+    fn add_assign(&mut self, val: u16) {
+        self.full = self.full + val;
+        self.high = (self.full >> 8) as byte;
+        self.low = (self.full & 0x00FF) as byte;
+    }
+}
+
 #[derive(Debug)]
 pub struct Memory {
     memory: Vec<byte>,
+    stack: Vec<Word>,
     memory_size: usize
 }
 
@@ -52,6 +70,11 @@ impl Memory {
     pub fn new(memory_size: usize) -> Memory {
         Memory {
             memory: vec![0; memory_size],
+            stack: vec![Word {
+                full: 0,
+                high: 0,
+                low: 0
+            }; 16],
             memory_size
         }
     }
@@ -73,7 +96,7 @@ impl Memory {
     pub fn print_mem_section(&self, start: u16, end: u16) {
         for (address, data) in self.memory.iter().enumerate() {
             if address as u16 >= start && address as u16 <= end {
-                println!("{:04X} : {:02x}", address, data);
+                debug!("{:04X} : {:02x}", address, data);
             }
         }
     }
