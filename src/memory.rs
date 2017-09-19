@@ -1,3 +1,5 @@
+use std::ops;
+
 pub struct Word {
     full: u16,
     high: byte,
@@ -24,6 +26,23 @@ impl Word {
     }
 }
 
+impl ops::Add<u16> for Word {
+    type Output = Word;
+
+    fn add(self, other: u16) -> Word {
+        Word::new_from_full(self.full + other)
+    }
+}
+
+impl ops::AddAssign<u16> for Word {
+    fn add_assign(&mut self, val: u16) {
+        self.full = self.full + val;
+        self.high = (self.full >> 8) as byte;
+        self.low = (self.full & 0x00FF) as byte;
+    }
+}
+
+#[derive(Debug)]
 pub struct Memory {
     memory: Vec<byte>,
     memory_size: usize
@@ -37,18 +56,26 @@ impl Memory {
         }
     }
 
-    pub fn read(&self, address: Word) -> byte {
+    pub fn read(&self, address: &Word) -> byte {
         if address.full >= self.memory_size as u16 {
             panic!(format!("Fatal: tried to read out of memory range: {:04X}", address.full));
         }
         self.memory[address.full as usize]
     }
 
-    pub fn write(&mut self, address: Word, value: byte) {
+    pub fn write(&mut self, address: &Word, value: byte) {
         if address.full >= self.memory_size as u16 {
             panic!(format!("Fatal: tried to write out of memory range: {:04X}", address.full));
         }
         self.memory[address.full as usize] = value;
+    }
+
+    pub fn print_mem_section(&self, start: u16, end: u16) {
+        for (address, data) in self.memory.iter().enumerate() {
+            if address as u16 >= start && address as u16 <= end {
+                println!("{:04X} : {:02x}", address, data);
+            }
+        }
     }
 }
 
@@ -63,7 +90,7 @@ mod test {
         let address = memory::Word::new_from_full(18);
 
         let result = panic::catch_unwind(|| {
-            memory.read(address);
+            memory.read(&address);
         });
 
         assert!(result.is_err());
@@ -75,6 +102,16 @@ mod test {
         let mut memory = memory::Memory::new(16);
         let address = memory::Word::new_from_full(27);
 
-        memory.write(address, 14);
+        memory.write(&address, 14);
+    }
+
+    #[test]
+    fn test_write_read() {
+        let mut memory = memory::Memory::new(16);
+        let address = memory::Word::new_from_full(12);
+
+        memory.write(&address, 128);
+
+        assert_eq!(memory.read(&address), 128);
     }
 }

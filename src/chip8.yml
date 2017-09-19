@@ -1,0 +1,14 @@
+name: chip8-emulator
+version: "1.0"
+author: Josh Marron <marronjosh@hotmail.com>
+
+about: Emulator for the CHIP 8 architecture
+
+args:
+    - ROM:
+        help: Sets the ROM file to run
+        required: true
+        index: 1
+    - verbose:
+        help: Sets the verbosity of the program - prints more debug stuff
+        short: v
