@@ -1,6 +1,7 @@
 use cpu::Cpu;
 use memory::*;
 use decoder;
+use decoder::Instruction;
 
 pub const PC_START : u16 = 0x200;
 
@@ -30,7 +31,13 @@ impl Chip8State {
     pub fn run_next_cycle(&mut self) {
         let opcode = self.fetch_instruction();
         let instruction = decoder::decode(opcode);
-        info!("{:?}", instruction);
+        
+        match instruction {
+            Instruction::Unknown => {
+
+            },
+            _ => info!("{:?}", instruction)
+        }
     }
 
     pub fn fetch_instruction(&mut self) -> Word {
@@ -41,8 +48,8 @@ impl Chip8State {
         let low_byte = self.memory.read(&counter);
         counter +=1;
 
-        info!("Program counter: {:?}", counter);
-        info!("Instruction fetched: {:02x}{:02x}", high_byte, low_byte);
+        debug!("Program counter: {:?}", counter);
+        debug!("Instruction fetched: {:02x}{:02x}", high_byte, low_byte);
         Word::new_from_bytes(high_byte, low_byte)
     }  
 }

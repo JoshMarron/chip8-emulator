@@ -27,8 +27,8 @@ pub fn run(config: Config) -> Result<(), Box<Error>> {
 }
 
 pub fn loop_emulation(mut state: Chip8State) {
-    loop {
+    
+    for _ in 0..270 {
         state.run_next_cycle();
-        break;
     }
 }
