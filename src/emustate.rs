@@ -33,10 +33,13 @@ impl Chip8State {
         let instruction = decoder::decode(opcode);
         
         if let Instruction::Unknown(op) = instruction {
-            error!("{} is unknown opcode", op);
+            error!("Fatal: {} is unknown opcode", op);
+            panic!();
         } else {
             debug!("{:04X} -- {:?}", self.cpu.program_counter().full(), instruction)
         }
+
+        self.cpu.run_instruction(instruction, &mut self.memory);
 
         trace!("{:?}", self.cpu);
     }

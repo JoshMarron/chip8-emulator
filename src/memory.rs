@@ -68,6 +68,14 @@ impl ops::Add<u16> for Word {
     }
 }
 
+impl ops::SubAssign<u16> for Word {
+    fn sub_assign(&mut self, val: u16) {
+        self.full = self.full - val;
+        self.high = (self.full >> 8) as Byte;
+        self.low = (self.full & 0x00FF) as Byte;
+    }
+}
+
 impl ops::AddAssign<u16> for Word {
     fn add_assign(&mut self, val: u16) {
         self.full = self.full + val;
@@ -95,11 +103,7 @@ impl Memory {
     pub fn new(memory_size: usize) -> Memory {
         Memory {
             memory: vec![0; memory_size],
-            stack: vec![Word {
-                full: 0,
-                high: 0,
-                low: 0
-            }; 16],
+            stack: Vec::with_capacity(16),
             memory_size
         }
     }
@@ -116,6 +120,15 @@ impl Memory {
             panic!(format!("Fatal: tried to write out of memory range: {:04X}", address.full));
         }
         self.memory[address.full as usize] = value;
+    }
+
+    pub fn pop_stack(&mut self) -> Option<Word> {
+        self.stack.pop()
+    }
+
+    pub fn push_stack(&mut self, value: Word) {
+        self.stack.push(value);
+        trace!("{:?}", self.stack);
     }
 
     pub fn print_mem_section(&self, start: u16, end: u16) {
