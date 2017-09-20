@@ -3,3 +3,4 @@
 .vscode
 pong.rom
 *.log
+*.dll
