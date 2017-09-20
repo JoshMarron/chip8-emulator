@@ -41,7 +41,7 @@ impl Chip8State {
 
         self.cpu.run_instruction(instruction, &mut self.memory);
 
-        trace!("{:?}", self.cpu);
+        debug!("{:?}", self.cpu);
     }
 
     pub fn fetch_instruction(&mut self) -> Word {

@@ -35,7 +35,6 @@ pub fn loop_emulation(mut state: Chip8State, debug: bool) -> Result<(), Box<Erro
         loop {
             let mut input = String::new();
             stdin.read_line(&mut input)?;
-
             if input.trim() == "n" {
                 state.run_next_cycle();
             } else if input.trim() == "exit" {
@@ -46,7 +45,7 @@ pub fn loop_emulation(mut state: Chip8State, debug: bool) -> Result<(), Box<Erro
             }
         }
     } else {
-        for _ in 0..121 {
+        for _ in 0..2000 {
             state.run_next_cycle();
         }
     }

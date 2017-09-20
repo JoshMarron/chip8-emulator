@@ -1,8 +1,13 @@
+extern crate rand;
+use self::rand::Rng;
+use std::num::Wrapping;
+
 use memory::Byte;
 use memory::Word;
 use memory::Memory;
 use emustate;
 use decoder::Instruction;
+use util;
 
 use std::mem;
 
@@ -58,7 +63,13 @@ impl Cpu {
     }
 
     pub fn run_instruction(&mut self, instruction: Instruction, memory: &mut Memory) {
+        if self.delay_time > 0 {
+            self.delay_time -= 1;
+        }
         match instruction {
+            Instruction::CLS => {
+                error!("Unimplemented CLS operation. Clear the screen");
+            }
             Instruction::RET => {
                 if let Some(value) = memory.pop_stack() {
                     self.program_counter = value;
@@ -98,8 +109,11 @@ impl Cpu {
                 let new_val = current as u16 + reg_val.value as u16;
                 if new_val > 255 {
                     self.set_reg(0xF, 1);
+                } else {
+                    self.set_reg(0xF, 0);
                 }
-                self.set_reg(reg_val.register, new_val as Byte);
+                let new_val = Wrapping(self.get_reg(reg_val.register)) + Wrapping(reg_val.value);
+                self.set_reg(reg_val.register, new_val.0);
             },
             Instruction::LDR(registers) => {
                 let value = self.get_reg(registers.second_reg);
@@ -109,8 +123,147 @@ impl Cpu {
                 let value = self.get_reg(registers.second_reg);
                 let current = self.get_mut_reg(registers.first_reg);
                 *current |= value;
+            },
+            Instruction::ANDR(registers) => {
+                let value = self.get_reg(registers.second_reg);
+                let current = self.get_mut_reg(registers.first_reg);
+                *current &= value;
+            },
+            Instruction::XORR(registers) => {
+                let value = self.get_reg(registers.second_reg);
+                let current = self.get_mut_reg(registers.first_reg);
+                *current ^= value;
+            },
+            Instruction::ADDR(registers) => {
+                let new_val = self.get_reg(registers.first_reg) as u16 + self.get_reg(registers.second_reg) as u16;
+                if new_val > 255 {
+                    self.set_reg(0xF, 1);
+                } else {
+                    self.set_reg(0xF, 0);
+                }
+                // Redo calculation with overflow
+                let new_val = Wrapping(self.get_reg(registers.first_reg)) + Wrapping(self.get_reg(registers.second_reg));
+                self.set_reg(registers.first_reg, new_val.0);
+            },
+            Instruction::SUBR(registers) => {
+                let reg1 = self.get_reg(registers.first_reg);
+                let reg2 = self.get_reg(registers.second_reg);
+
+                if reg1 > reg2 {
+                    self.set_reg(0xF, 1);
+                } else {
+                    self.set_reg(0xF, 0);
+                }
+
+                self.set_reg(registers.first_reg, reg1 - reg2);
+            },
+            Instruction::SHR(reg) => {
+                let current = self.get_reg(reg);
+                self.set_reg(0xF, current & 0b00000001);
+                self.set_reg(reg, current >> 1);
+            },
+            Instruction::SUBNR(registers) => {
+                let reg1 = self.get_reg(registers.first_reg);
+                let reg2 = self.get_reg(registers.second_reg);
+
+                if reg2 > reg1 {
+                    self.set_reg(0xF, 1);
+                } else {
+                    self.set_reg(0xF, 0);
+                }
+                self.set_reg(registers.first_reg, reg2 - reg1);
+            },
+            Instruction::SHL(reg) => {
+                let current = self.get_reg(reg);
+                self.set_reg(0xF, current >> 7);
+                self.set_reg(reg, current << 1);
+            },
+            Instruction::SNER(registers) => {
+                if self.get_reg(registers.first_reg) != self.get_reg(registers.second_reg) {
+                    self.program_counter += 2;
+                }
+            },
+            Instruction::LDI(address) => {
+                self.i_register = address;
+            },
+            Instruction::JUMPV0(address) => {
+                self.program_counter = address + self.get_reg(0) as u16;
+            },
+            Instruction::RND(reg_val) => {
+                let mut rng = rand::thread_rng();
+                let rand = rng.gen_range(0, 256) as Byte;
+                self.set_reg(reg_val.register, rand & reg_val.value);
+            },
+            Instruction::DRW(reg_nibble) => {
+                let x = self.get_reg(reg_nibble.first_reg);
+                let y = self.get_reg(reg_nibble.second_reg);
+                error!("Unimplemented, draw {:02X} byte from address {} sprite at coords {} - {}", 
+                            reg_nibble.nibble,
+                            self.i_register, 
+                            x, 
+                            y);
+            },
+            Instruction::SKP(reg) => {
+                error!("Unimplemented SKP, check key at reg {:02x} - {}", reg, self.get_reg(reg));
+            },
+            Instruction::SKNP(reg) => {
+                error!("Unimplemented SKNP, check key not pressed at reg {:02x} - {}", reg, self.get_reg(reg));
+            },
+            Instruction::LDVDT(reg) => {
+                let delay = self.delay_time;
+                self.set_reg(reg, delay);
+            },
+            Instruction::LDK(reg) => {
+                error!("Unimplemented LDK, wait for key press and store in reg {:02x}", reg);
+            },
+            Instruction::LDDTV(reg) => {
+                self.delay_time = self.get_reg(reg);
+            },
+            Instruction::LDSTV(reg) => {
+                self.sound_timer = self.get_reg(reg);
+            },
+            Instruction::ADDI(reg) => {
+                let i_val = self.i_register.clone();
+                self.i_register = i_val + self.get_reg(reg) as u16;
+            },
+            Instruction::LDFONT(reg) => {
+                let font_code = self.get_reg(reg);
+                error!("Unimplemented LDFONT, fetch the font element with code {:02x}", font_code);
+            },
+            Instruction::LDBCD(reg) => {
+                let val = self.get_reg(reg);
+                let mut digits : Vec<Byte> = Vec::with_capacity(3);
+                util::get_digits(val as u16, &mut digits);
+                
+                let mut address = self.i_register.clone();
+
+                for digit in digits {
+                    memory.write(&address, digit);
+                    address += 1;
+                }
+
+                memory.print_mem_section(address.full() - 3, address.full());
+            },
+            Instruction::STARR(reg) => {
+                let mut address = self.i_register.clone();
+                for n in 0..reg + 1 {
+                    memory.write(&address, self.get_reg(n));
+                    address += 1;
+                }
+
+                memory.print_mem_section(address.full() - (reg + 1) as u16, address.full());
+            },
+            Instruction::LDARR(reg) => {
+                let mut address = self.i_register.clone();
+                for n in 0..reg + 1 {
+                    self.set_reg(n, memory.read(&address));
+                    address += 1;
+                }
+            },
+            Instruction::Unknown(opcode) => {
+                error!("Fatal: unknown opcode: {}", opcode);
+                panic!();
             }
-            _ => error!("Unimplemented: {:?}", instruction)
         }
     }
 }

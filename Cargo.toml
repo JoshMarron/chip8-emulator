@@ -7,3 +7,4 @@ authors = ["Joshua Marron <marronjosh@hotmail.com>"]
 clap = { version = "2.26.2", features = ["yaml"] }
 fern = "0.4"
 log = "0.3"
+rand = "0.3"
