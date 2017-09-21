@@ -1,5 +1,6 @@
 use emustate::Chip8State;
 use memory::Byte;
+use display::Display;
 
 use std::error::Error;
 use std::fs::File;
@@ -48,6 +49,10 @@ pub fn loop_emulation(mut state: Chip8State, debug: bool) -> Result<(), Box<Erro
         for _ in 0..2000 {
             state.run_next_cycle();
         }
+    }
+
+    loop {
+        
     }
 
     Ok(())

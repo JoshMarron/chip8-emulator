@@ -8,4 +8,4 @@ clap = { version = "2.26.2", features = ["yaml"] }
 fern = "0.4"
 log = "0.3"
 rand = "0.3"
-sdl2 = "0.3"
+sdl2 = "0.30"

@@ -122,6 +122,10 @@ impl Memory {
         self.memory[address.full as usize] = value;
     }
 
+    pub fn read_slice(&self, address: &Word, length: Byte) -> &[Byte] {
+        &self.memory[address.full as usize..(address.full + length as u16) as usize]
+    }
+
     pub fn pop_stack(&mut self) -> Option<Word> {
         self.stack.pop()
     }

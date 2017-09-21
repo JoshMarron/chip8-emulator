@@ -1,5 +1,6 @@
 use cpu::Cpu;
 use memory::*;
+use display::Display;
 use decoder;
 use decoder::Instruction;
 
@@ -7,14 +8,16 @@ pub const PC_START : u16 = 0x200;
 
 pub struct Chip8State {
     cpu: Cpu,
-    memory: Memory
+    memory: Memory,
+    display: Display
 }
 
 impl Chip8State {
     pub fn new() -> Chip8State {
         Chip8State {
             cpu: Cpu::new(),
-            memory: Memory::new(4096)
+            memory: Memory::new(4096),
+            display: Display::new()
         }
     }
 
@@ -39,7 +42,11 @@ impl Chip8State {
             debug!("{:04X} -- {:?}", self.cpu.program_counter().full(), instruction)
         }
 
-        self.cpu.run_instruction(instruction, &mut self.memory);
+        self.cpu.run_instruction(instruction, &mut self.memory, &mut self.display);
+
+        if self.display.vram_changed() {
+            self.display.refresh_display();
+        }
 
         debug!("{:?}", self.cpu);
     }

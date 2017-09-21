@@ -5,6 +5,10 @@ use std::num::Wrapping;
 use memory::Byte;
 use memory::Word;
 use memory::Memory;
+
+use display::Display;
+use display::Sprite;
+
 use emustate;
 use decoder::Instruction;
 use util;
@@ -62,7 +66,7 @@ impl Cpu {
         }
     }
 
-    pub fn run_instruction(&mut self, instruction: Instruction, memory: &mut Memory) {
+    pub fn run_instruction(&mut self, instruction: Instruction, memory: &mut Memory, display: &mut Display) {
         if self.delay_time > 0 {
             self.delay_time -= 1;
         }
@@ -155,7 +159,7 @@ impl Cpu {
                     self.set_reg(0xF, 0);
                 }
 
-                self.set_reg(registers.first_reg, reg1 - reg2);
+                self.set_reg(registers.first_reg, (Wrapping(reg1) - Wrapping(reg2)).0);
             },
             Instruction::SHR(reg) => {
                 let current = self.get_reg(reg);
@@ -171,7 +175,7 @@ impl Cpu {
                 } else {
                     self.set_reg(0xF, 0);
                 }
-                self.set_reg(registers.first_reg, reg2 - reg1);
+                self.set_reg(registers.first_reg, (Wrapping(reg2) - Wrapping(reg1)).0)
             },
             Instruction::SHL(reg) => {
                 let current = self.get_reg(reg);
@@ -202,6 +206,9 @@ impl Cpu {
                             self.i_register, 
                             x, 
                             y);
+
+                let sprite = Sprite::new(memory.read_slice(&self.i_register, reg_nibble.nibble));
+                self.set_reg(0xF, display.draw_sprite(x, y, sprite));
             },
             Instruction::SKP(reg) => {
                 error!("Unimplemented SKP, check key at reg {:02x} - {}", reg, self.get_reg(reg));
