@@ -66,7 +66,7 @@ impl Cpu {
         }
     }
 
-    pub fn run_instruction(&mut self, instruction: Instruction, memory: &mut Memory, display: &mut Display) {
+    pub fn run_instruction(&mut self, instruction: Instruction, memory: &mut Memory, display: &mut Display, keys: &[bool]) {
         if self.delay_time > 0 {
             self.delay_time -= 1;
         }
@@ -201,19 +201,21 @@ impl Cpu {
             Instruction::DRW(reg_nibble) => {
                 let x = self.get_reg(reg_nibble.first_reg);
                 let y = self.get_reg(reg_nibble.second_reg);
-                error!("Unimplemented, draw {:02X} byte from address {} sprite at coords {} - {}", 
-                            reg_nibble.nibble,
-                            self.i_register, 
-                            x, 
-                            y);
-
                 let sprite = Sprite::new(memory.read_slice(&self.i_register, reg_nibble.nibble));
                 self.set_reg(0xF, display.draw_sprite(x, y, sprite));
             },
             Instruction::SKP(reg) => {
+                let keycode = self.get_reg(reg);
+                if keys[keycode as usize] {
+                    self.program_counter += 2;
+                }
                 error!("Unimplemented SKP, check key at reg {:02x} - {}", reg, self.get_reg(reg));
             },
             Instruction::SKNP(reg) => {
+                let keycode = self.get_reg(reg);
+                if keys[keycode as usize] {
+                    self.program_counter += 2;
+                }
                 error!("Unimplemented SKNP, check key not pressed at reg {:02x} - {}", reg, self.get_reg(reg));
             },
             Instruction::LDVDT(reg) => {
@@ -221,6 +223,13 @@ impl Cpu {
                 self.set_reg(reg, delay);
             },
             Instruction::LDK(reg) => {
+                for (i, key) in keys.iter().enumerate() {
+                    if *key {
+                        self.set_reg(reg, i as u8);
+                        return;
+                    }
+                }
+                self.program_counter -= 2;
                 error!("Unimplemented LDK, wait for key press and store in reg {:02x}", reg);
             },
             Instruction::LDDTV(reg) => {
@@ -235,6 +244,7 @@ impl Cpu {
             },
             Instruction::LDFONT(reg) => {
                 let font_code = self.get_reg(reg);
+                self.i_register = memory.get_font(font_code);
                 error!("Unimplemented LDFONT, fetch the font element with code {:02x}", font_code);
             },
             Instruction::LDBCD(reg) => {

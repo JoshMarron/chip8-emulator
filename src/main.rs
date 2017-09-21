@@ -16,6 +16,8 @@ mod emulator;
 mod decoder;
 mod util;
 mod display;
+mod input;
+mod font;
 
 fn main() {
     let yaml = load_yaml!("chip8.yml");

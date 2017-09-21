@@ -4,7 +4,7 @@ use self::sdl2::rect;
 use self::sdl2::render::Canvas;
 use self::sdl2::video::Window;
 
-const PIXEL_SIZE : u32 = 5;
+const PIXEL_SIZE : u32 = 10;
 const CHIP8_WIDTH : usize = 64;
 const CHIP8_HEIGHT : usize = 32;
 
@@ -63,9 +63,9 @@ impl Display {
                     self.vram[y as usize][mut_x as usize] ^= bit;
                 }
                 row <<= 1;
-                mut_x += 1;
+                mut_x = if (mut_x == (CHIP8_WIDTH - 1) as u8) {0} else {mut_x + 1};
             }
-            y += 1;
+            y = if (y == (CHIP8_HEIGHT - 1) as u8) {0} else {y + 1};
         }
         self.vram_changed = true;
         collision
@@ -87,12 +87,16 @@ impl Display {
     pub fn vram_changed(&self) -> bool {
         self.vram_changed
     }
+
+    pub fn get_context(&self) -> &sdl2::Sdl {
+        &self.sdl2_context
+    }
 }
 
 impl Pixel {
     fn new(xpos : usize, ypos : usize, colour: u8) -> Pixel {
         Pixel {
-            colour: if colour == 1 { pixels::Color::RGB(255, 255, 255) } else { pixels::Color::RGB(70, 80, 250) },
+            colour: if colour == 1 { pixels::Color::RGB(255, 255, 255) } else { pixels::Color::RGB(0, 0, 0) },
             representation: rect::Rect::new(
                                 (xpos as i32 * PIXEL_SIZE as i32), 
                                 (ypos as i32 * PIXEL_SIZE as i32),

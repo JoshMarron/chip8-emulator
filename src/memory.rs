@@ -1,6 +1,8 @@
 use std::ops;
 use std::fmt;
 
+const FONT_SIZE : u8 = 5;
+
 #[derive(Clone)]
 pub struct Word {
     full: u16,
@@ -141,6 +143,10 @@ impl Memory {
                 trace!("{:04X} : {:02x}", address, data);
             }
         }
+    }
+
+    pub fn get_font(&self, character: Byte) -> Word {
+        Word::new_from_full((character * FONT_SIZE) as u16)
     }
 }
 

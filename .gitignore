@@ -1,6 +1,6 @@
 /target/
 **/*.rs.bk
 .vscode
-pong.rom
+*.rom
 *.log
 *.dll
