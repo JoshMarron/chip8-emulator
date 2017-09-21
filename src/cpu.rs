@@ -72,7 +72,7 @@ impl Cpu {
         }
         match instruction {
             Instruction::CLS => {
-                error!("Unimplemented CLS operation. Clear the screen");
+                display.clear_screen();
             }
             Instruction::RET => {
                 if let Some(value) = memory.pop_stack() {
@@ -145,7 +145,6 @@ impl Cpu {
                 } else {
                     self.set_reg(0xF, 0);
                 }
-                // Redo calculation with overflow
                 let new_val = Wrapping(self.get_reg(registers.first_reg)) + Wrapping(self.get_reg(registers.second_reg));
                 self.set_reg(registers.first_reg, new_val.0);
             },
@@ -209,14 +208,12 @@ impl Cpu {
                 if keys[keycode as usize] {
                     self.program_counter += 2;
                 }
-                error!("Unimplemented SKP, check key at reg {:02x} - {}", reg, self.get_reg(reg));
             },
             Instruction::SKNP(reg) => {
                 let keycode = self.get_reg(reg);
                 if keys[keycode as usize] {
                     self.program_counter += 2;
                 }
-                error!("Unimplemented SKNP, check key not pressed at reg {:02x} - {}", reg, self.get_reg(reg));
             },
             Instruction::LDVDT(reg) => {
                 let delay = self.delay_time;
@@ -230,7 +227,6 @@ impl Cpu {
                     }
                 }
                 self.program_counter -= 2;
-                error!("Unimplemented LDK, wait for key press and store in reg {:02x}", reg);
             },
             Instruction::LDDTV(reg) => {
                 self.delay_time = self.get_reg(reg);
@@ -245,7 +241,6 @@ impl Cpu {
             Instruction::LDFONT(reg) => {
                 let font_code = self.get_reg(reg);
                 self.i_register = memory.get_font(font_code);
-                error!("Unimplemented LDFONT, fetch the font element with code {:02x}", font_code);
             },
             Instruction::LDBCD(reg) => {
                 let val = self.get_reg(reg);

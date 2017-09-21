@@ -91,6 +91,11 @@ impl Display {
     pub fn get_context(&self) -> &sdl2::Sdl {
         &self.sdl2_context
     }
+
+    pub fn clear_screen(&mut self) {
+        self.vram = [[0u8; CHIP8_WIDTH]; CHIP8_HEIGHT];
+        self.vram_changed = true;
+    }
 }
 
 impl Pixel {
