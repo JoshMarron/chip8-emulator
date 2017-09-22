@@ -1,11 +1,12 @@
 use emustate::Chip8State;
 use memory::Byte;
-use display::Display;
 
 use std::error::Error;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io;
+use std::thread;
+use std::time;
 
 #[derive(Debug)]
 pub struct Config {
@@ -48,7 +49,7 @@ pub fn loop_emulation(mut state: Chip8State, debug: bool) -> Result<(), Box<Erro
         }
     } else {
         while let Ok(()) = state.run_next_cycle() {
-
+            thread::sleep(time::Duration::from_millis(2));
         }
     }
 

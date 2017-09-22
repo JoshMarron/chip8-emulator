@@ -60,7 +60,7 @@ pub fn setup_logging(config: &emulator::Config) -> Result<(), fern::InitError> {
         })
         .level(level)
         .chain(std::io::stdout())
-        .chain(fern::log_file("output.log")?)
+        //.chain(fern::log_file("output.log")?)
         .apply()?;
 
     Ok(())

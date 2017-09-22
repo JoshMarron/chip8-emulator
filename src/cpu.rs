@@ -211,7 +211,7 @@ impl Cpu {
             },
             Instruction::SKNP(reg) => {
                 let keycode = self.get_reg(reg);
-                if keys[keycode as usize] {
+                if !keys[keycode as usize] {
                     self.program_counter += 2;
                 }
             },

@@ -38,7 +38,7 @@ impl Display {
         
         let mut canvas = window.into_canvas().present_vsync().build().unwrap();
 
-        canvas.set_draw_color(pixels::Color::RGB(70, 80, 250));
+        canvas.set_draw_color(pixels::Color::RGB(0, 0, 0));
         canvas.clear();
         canvas.present();
 
