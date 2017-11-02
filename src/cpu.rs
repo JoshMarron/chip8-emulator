@@ -70,6 +70,12 @@ impl Cpu {
         if self.delay_time > 0 {
             self.delay_time -= 1;
         }
+        if self.sound_timer > 0 {
+            display.play_audio();
+            self.sound_timer -= 1;
+        } else {
+            display.pause_audio();
+        }
         match instruction {
             Instruction::CLS => {
                 display.clear_screen();
@@ -233,6 +239,7 @@ impl Cpu {
             },
             Instruction::LDSTV(reg) => {
                 self.sound_timer = self.get_reg(reg);
+                display.play_audio();
             },
             Instruction::ADDI(reg) => {
                 let i_val = self.i_register.clone();
